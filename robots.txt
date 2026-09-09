@@ -1,0 +1,3 @@
+# Превью на GitHub Pages: индексировать не нужно. На проде заменить на Allow: / и указать Sitemap.
+User-agent: *
+Disallow: /
