@@ -44,9 +44,9 @@ h3{font-size:clamp(17px,2vw,21px);line-height:1.15}
 .btn:active{transform:translateY(0)}
 .btn-acc{background:var(--blue);color:#fff;box-shadow:0 16px 32px -14px rgba(23,87,230,.7)}
 .btn-acc:hover{background:var(--blue2)}
-.btn-wa{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:0 12px 26px -16px rgba(11,23,48,.4)}
-.btn-wa svg{color:#25D366}
-.btn-wa:hover{border-color:var(--steel2)}
+.btn-wa{background:#25D366;color:#fff;border-color:#25D366;box-shadow:0 14px 30px -16px rgba(37,211,102,.75)}
+.btn-wa svg{color:#fff}
+.btn-wa:hover{background:#1FBF5B;border-color:#1FBF5B}
 .btn-ink{background:var(--ink);color:#fff}
 .btn-ink:hover{background:var(--deep2)}
 .btn-ghost2{background:transparent;color:var(--ink);border-color:var(--steel2)}
@@ -350,7 +350,7 @@ form .btn{margin-top:4px}
 .bar{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translate(-50%,calc(100% + 30px));z-index:45;display:flex;background:var(--navy);color:#fff;border-radius:999px;padding:5px;box-shadow:0 14px 34px -10px rgba(0,0,0,.55);transition:transform .45s cubic-bezier(.2,.7,.2,1);width:min(360px,calc(100% - 32px))}
 .bar.show{transform:translate(-50%,0)}
 .bar a{flex:1;display:flex;align-items:center;justify-content:center;height:46px;border-radius:999px;font:700 13px/1 var(--ft);letter-spacing:.02em}
-.bar a:last-child{background:var(--blue);color:#fff}
+.bar a:last-child{background:#25D366;color:#fff}
 @media(min-width:761px){.bar{display:none}}
 
 /* появление в каталожных секциях */
