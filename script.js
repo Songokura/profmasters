@@ -42,7 +42,7 @@ var KZ = {
 "h.kick":"Астана · үйде жөндеу · 12 жыл",
 "h.h1a":"Кір жуғыш","h.h1b":"машина жөндеу",
 "h.lead":"Астана және 150 км-ге дейінгі қала маңына шығамыз. Түпнұсқа қосалқы бөлшектер, 1 жылға дейін кепілдік. 2GIS-те 138 пікір бойынша 4.9.",
-"h.a":"Кір жуғыш машинаның ашық барабаны жақыннан","h.rpm":"айн/мин",
+"h.a":"Жарық кір жуатын бөлмедегі кір жуғыш машина",
 
 "sy.k":"Машинаға не болды","sy.h":"Ақауыңызды табыңыз",
 "sy.l":"Диагностика орнында, бағасын жұмысқа кіріспес бұрын айтамыз. Белгіні басыңыз - өтінім дайын.",
@@ -239,7 +239,7 @@ function fillTicker(){
   fillOne(document.getElementById("br3"), BR[2], 42);
 }
 var tkTimer;
-addEventListener("resize", function(){ clearTimeout(tkTimer); tkTimer = setTimeout(function(){ fillTicker(); fitText(); lukGeom(); lanes.forEach(function(l){ l.state(); }); }, 200); });
+addEventListener("resize", function(){ clearTimeout(tkTimer); tkTimer = setTimeout(function(){ fillTicker(); fitText(); lanes.forEach(function(l){ l.state(); }); }, 200); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fillTicker(); fitText(); });
 
 /* ---------------- МЕНЮ ---------------- */
@@ -273,79 +273,17 @@ document.addEventListener("click", function(e){
 var hdr = document.getElementById("hdr");
 function hdrState(){ if (hdr) hdr.classList.toggle("solid", scrollY > 40); }
 
-/* ---------------- ЛЮК-БАРАБАН В ГЕРОЕ ----------------
-   Объект садится точно на барабан фотографии. Центр и радиус барабана
-   известны в долях кадра (два кроя: десктоп и мобайл), положение на экране
-   считается по правилам object-fit:cover + object-position. */
+/* ---------------- ГЕРОЙ ---------------- */
 var heroPw = document.getElementById("top");
 var hero = document.getElementById("hero");
-var luk = document.getElementById("luk");
-var rpmEl = document.getElementById("rpm");
-var GEO_D = {iw:3300, ih:1000, cx:2152/3300, cy:.52, r:.30, rh:true};            /* r - доля высоты кадра */
-var GEO_M = {iw:900,  ih:1600, cx:.50, cy:.36, r:.38, rh:false, px:.50, py:.36};  /* r - доля ширины кадра */
-var STEEL = 164;                                                                  /* радиус барабана в единицах viewBox 440 */
-/* Люк садится на барабан фото. Фото тянется по cover, поэтому единственная свобода -
-   панорама кадра: её и подбираем так, чтобы шкала целиком влезла между шапкой и бегущей
-   строкой и не наехала на текст. Панораму пишем в object-position в пикселях. */
-function lukGeom(){
-  if (!hero || !luk) return;
-  var W = hero.clientWidth, H = hero.clientHeight;
-  var mob = matchMedia("(max-width:760px)").matches;
-  var g = mob ? GEO_M : GEO_D;
-  var img = hero.querySelector(".bg img");
-  var s = Math.max(W / g.iw, H / g.ih), rw = g.iw * s, rh = g.ih * s;
-  var r = g.rh ? g.r * rh : g.r * rw;
-  var box = r * 440 / STEEL;
-  var cx, cy, x0, y0;
-  if (mob) {
-    x0 = (W - rw) * g.px; y0 = (H - rh) * g.py;
-    cx = x0 + g.cx * rw;  cy = y0 + g.cy * rh;
-  } else {
-    var hh = parseFloat(getComputedStyle(hero).getPropertyValue("--hh")) || 64;
-    var padT = hh + 12, padB = 52, padR = 16;                    /* шапка сверху, бегущая строка снизу */
-    var band = Math.min(H - padT - padB, W - 2 * padR);
-    if (box > band) box = band;                                  /* окно ниже или уже шкалы: ужимаем её */
-    r = box * STEEL / 440;
-    cy = Math.min(Math.max(H * g.cy, padT + box / 2), H - padB - box / 2);
-    y0 = Math.min(0, Math.max(H - rh, cy - g.cy * rh));
-    cy = y0 + g.cy * rh;
-    var txt = hero.querySelector(".hero-in");
-    var textR = txt ? txt.offsetLeft + txt.offsetWidth * 0.48 : W * 0.42;   /* правый край текстовой колонки */
-    var free0 = textR + 14, free1 = W - padR;                    /* свободная зона справа от текста */
-    var maxX = free1 - box / 2, minX = free0 + box / 2;
-    cx = minX > maxX ? maxX : (free0 + free1) / 2;               /* по центру зоны; если не влезает - правый край важнее */
-    x0 = Math.min(0, Math.max(W - rw, cx - g.cx * rw));
-    cx = x0 + g.cx * rw;
-  }
-  if (img) img.style.objectPosition = Math.round(x0) + "px " + Math.round(y0) + "px";
-  luk.style.left = cx + "px"; luk.style.top = cy + "px";
-  luk.style.width = box + "px"; luk.style.height = box + "px";
-  luk.style.setProperty("--rpmfs", Math.round(r * .21) + "px");
-  luk.style.setProperty("--rpmls", Math.max(8, Math.round(r * .065)) + "px");
-  hero.style.setProperty("--dcx", cx + "px");
-  hero.style.setProperty("--dcy", cy + "px");
-}
-/* шкала: 33 риски от -135 до +135 градусов, крупная каждая четвёртая (400 ... 1200) */
-(function(){
-  var g = document.getElementById("ticks"); if (!g) return;
-  var html = "";
-  for (var i = 0; i <= 32; i++) {
-    var a = (-135 + 270 * i / 32) * Math.PI / 180, mj = i % 4 === 0;
-    var r1 = mj ? 186 : 190, r2 = 198;
-    html += '<line class="' + (mj ? "mj" : "") + '" x1="' + (220 + r1 * Math.sin(a)).toFixed(1) + '" y1="' + (220 - r1 * Math.cos(a)).toFixed(1) +
-            '" x2="' + (220 + r2 * Math.sin(a)).toFixed(1) + '" y2="' + (220 - r2 * Math.cos(a)).toFixed(1) + '"/>';
-  }
-  g.innerHTML = html;
-})();
-
 /* ---------------- ПЛИТЫ ----------------
    Один слушатель scroll через rAF. На каждую обёртку .pw пишем
    --enter / --exit / --stay и --open (сектор развёртки), герою ещё --f
-   (интро: сектор проявляет фото) и --rpm (обороты по прокрутке). */
+   (интро: сектор проявляет фото). */
 var pws = [].slice.call(document.querySelectorAll(".pw"));
 var bar = document.getElementById("bar");
 var kont = document.getElementById("kontakty");
-var introK = 1, introDone = true, lastRpm = -1;
+var introK = 1, introDone = true;
 function clamp(v){ return v < 0 ? 0 : (v > 1 ? 1 : v); }
 function easeOut(t){ return 1 - Math.pow(1 - t, 2.4); }
 function update(){
@@ -363,10 +301,6 @@ function update(){
     pw.classList.toggle("on", enter > 0.62);
     if (pw === heroPw) {
       pw.style.setProperty("--f", introK.toFixed(3));
-      var k = easeOut(clamp(stay * 1.25));
-      pw.style.setProperty("--rpm", k.toFixed(3));
-      var rpm = Math.round((400 + 800 * k) / 10) * 10;
-      if (rpmEl && rpm !== lastRpm) { rpmEl.textContent = rpm; lastRpm = rpm; }
     }
   });
   hdrState();
@@ -376,7 +310,6 @@ function update(){
     bar.classList.toggle("show", scrollY > H * 0.55 && !onKont);
   }
 }
-lukGeom();
 if (RED) {
   root.classList.add("no-plate");
   root.classList.add("no-intro");
@@ -389,8 +322,8 @@ if (RED) {
     if (tick) return; tick = true;
     requestAnimationFrame(function(){ tick = false; update(); });
   }, {passive:true});
-  addEventListener("resize", function(){ lukGeom(); update(); });
-  addEventListener("load", function(){ lukGeom(); update(); });
+  addEventListener("resize", update);
+  addEventListener("load", update);
   /* интро 1250 мс: сектор проявляет фото по часовой стрелке, люк доворачивается, шкала прочерчивается.
      Пропускаем при хэше / прокрутке - человек из рекламы сразу видит собранный экран. */
   var skip = location.hash || scrollY > 80;
@@ -416,7 +349,7 @@ if (RED) {
     setTimeout(function(){ if (!introDone) { introDone = true; introK = 1; update(); } }, 1800);
   }
 }
-window.plateSync = function(){ introDone = true; introK = 1; if (hero) hero.classList.add("on"); lukGeom(); update(); };
+window.plateSync = function(){ introDone = true; introK = 1; if (hero) hero.classList.add("on"); update(); };
 addEventListener("hashchange", function(){ root.classList.add("no-intro"); });
 
 /* ---------------- ПОЯВЛЕНИЕ В КАТАЛОЖНЫХ СЕКЦИЯХ ---------------- */
