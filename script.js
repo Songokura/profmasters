@@ -281,19 +281,42 @@ var heroPw = document.getElementById("top");
 var hero = document.getElementById("hero");
 var luk = document.getElementById("luk");
 var rpmEl = document.getElementById("rpm");
-var GEO_D = {iw:1600, ih:1000, cx:.72, cy:.52, r:.30, rh:true,  px:.72, py:.52};   /* r - доля высоты */
-var GEO_M = {iw:900,  ih:1600, cx:.50, cy:.36, r:.38, rh:false, px:.50, py:.36};  /* r - доля ширины */
+var GEO_D = {iw:2600, ih:1000, cx:2152/2600, cy:.52, r:.30, rh:true};            /* r - доля высоты кадра */
+var GEO_M = {iw:900,  ih:1600, cx:.50, cy:.36, r:.38, rh:false, px:.50, py:.36};  /* r - доля ширины кадра */
 var STEEL = 164;                                                                  /* радиус барабана в единицах viewBox 440 */
+/* Люк садится на барабан фото. Фото тянется по cover, поэтому единственная свобода -
+   панорама кадра: её и подбираем так, чтобы шкала целиком влезла между шапкой и бегущей
+   строкой и не наехала на текст. Панораму пишем в object-position в пикселях. */
 function lukGeom(){
   if (!hero || !luk) return;
   var W = hero.clientWidth, H = hero.clientHeight;
-  var g = matchMedia("(max-width:760px)").matches ? GEO_M : GEO_D;
-  var py = (g === GEO_D && H <= 700) ? 0.30 : g.py;               /* низкий десктоп: барабан ниже, чтобы шкала не ушла под шапку */
+  var mob = matchMedia("(max-width:760px)").matches;
+  var g = mob ? GEO_M : GEO_D;
+  var img = hero.querySelector(".bg img");
   var s = Math.max(W / g.iw, H / g.ih), rw = g.iw * s, rh = g.ih * s;
-  var x0 = (W - rw) * g.px, y0 = (H - rh) * py;
-  var cx = x0 + g.cx * rw, cy = y0 + g.cy * rh;
   var r = g.rh ? g.r * rh : g.r * rw;
   var box = r * 440 / STEEL;
+  var cx, cy, x0, y0;
+  if (mob) {
+    x0 = (W - rw) * g.px; y0 = (H - rh) * g.py;
+    cx = x0 + g.cx * rw;  cy = y0 + g.cy * rh;
+  } else {
+    var hh = parseFloat(getComputedStyle(hero).getPropertyValue("--hh")) || 64;
+    var padT = hh + 12, padB = 52, padR = 16;                    /* шапка сверху, бегущая строка снизу */
+    var band = Math.min(H - padT - padB, W - 2 * padR);
+    if (box > band) box = band;                                  /* окно ниже или уже шкалы: ужимаем её */
+    r = box * STEEL / 440;
+    cy = Math.min(Math.max(H * g.cy, padT + box / 2), H - padB - box / 2);
+    y0 = Math.min(0, Math.max(H - rh, cy - g.cy * rh));
+    cy = y0 + g.cy * rh;
+    var maxX = W - padR - box / 2;                               /* правым краем не вылезаем */
+    var minX = box / 2 + W * 0.42;                               /* и не наезжаем на текст слева */
+    cx = Math.min(g.cx * W, maxX);
+    if (cx < minX) cx = Math.min(minX, maxX);                    /* правый край важнее */
+    x0 = Math.min(0, Math.max(W - rw, cx - g.cx * rw));
+    cx = x0 + g.cx * rw;
+  }
+  if (img) img.style.objectPosition = Math.round(x0) + "px " + Math.round(y0) + "px";
   luk.style.left = cx + "px"; luk.style.top = cy + "px";
   luk.style.width = box + "px"; luk.style.height = box + "px";
   luk.style.setProperty("--rpmfs", Math.round(r * .21) + "px");
@@ -365,7 +388,7 @@ if (RED) {
     if (tick) return; tick = true;
     requestAnimationFrame(function(){ tick = false; update(); });
   }, {passive:true});
-  addEventListener("resize", update);
+  addEventListener("resize", function(){ lukGeom(); update(); });
   addEventListener("load", function(){ lukGeom(); update(); });
   /* интро 1250 мс: сектор проявляет фото по часовой стрелке, люк доворачивается, шкала прочерчивается.
      Пропускаем при хэше / прокрутке - человек из рекламы сразу видит собранный экран. */
