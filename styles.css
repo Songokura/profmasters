@@ -109,7 +109,7 @@ html.no-plate .pw{--f:1;--open:1;--enter:1;--rpm:1}
 .hero .bg{position:absolute;inset:0;z-index:0;
   -webkit-mask-image:conic-gradient(from 0deg at var(--dcx) var(--dcy),#000 0deg,#000 calc(var(--f) * 360deg),transparent calc(var(--f) * 360deg + .01deg));
   mask-image:conic-gradient(from 0deg at var(--dcx) var(--dcy),#000 0deg,#000 calc(var(--f) * 360deg),transparent calc(var(--f) * 360deg + .01deg))}
-.hero .bg img{width:100%;height:100%;object-fit:cover;object-position:88% 52%;transform:scale(calc(1 + .06 * var(--stay)));transform-origin:var(--dcx) var(--dcy)}
+.hero .bg img{width:100%;height:100%;object-fit:cover;object-position:72% 52%;transform:scale(calc(1 + .06 * var(--stay)));transform-origin:var(--dcx) var(--dcy)}
 .hero .veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:
   linear-gradient(90deg,rgba(243,246,250,.96) 0%,rgba(243,246,250,.86) 30%,rgba(243,246,250,.35) 52%,rgba(243,246,250,0) 66%),
   linear-gradient(180deg,rgba(243,246,250,.55) 0%,rgba(243,246,250,0) 22%,rgba(243,246,250,0) 70%,rgba(243,246,250,.9) 100%)}

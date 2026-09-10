@@ -281,7 +281,7 @@ var heroPw = document.getElementById("top");
 var hero = document.getElementById("hero");
 var luk = document.getElementById("luk");
 var rpmEl = document.getElementById("rpm");
-var GEO_D = {iw:2600, ih:1000, cx:2152/2600, cy:.52, r:.30, rh:true};            /* r - доля высоты кадра */
+var GEO_D = {iw:3300, ih:1000, cx:2152/3300, cy:.52, r:.30, rh:true};            /* r - доля высоты кадра */
 var GEO_M = {iw:900,  ih:1600, cx:.50, cy:.36, r:.38, rh:false, px:.50, py:.36};  /* r - доля ширины кадра */
 var STEEL = 164;                                                                  /* радиус барабана в единицах viewBox 440 */
 /* Люк садится на барабан фото. Фото тянется по cover, поэтому единственная свобода -
@@ -309,10 +309,11 @@ function lukGeom(){
     cy = Math.min(Math.max(H * g.cy, padT + box / 2), H - padB - box / 2);
     y0 = Math.min(0, Math.max(H - rh, cy - g.cy * rh));
     cy = y0 + g.cy * rh;
-    var maxX = W - padR - box / 2;                               /* правым краем не вылезаем */
-    var minX = box / 2 + W * 0.42;                               /* и не наезжаем на текст слева */
-    cx = Math.min(g.cx * W, maxX);
-    if (cx < minX) cx = Math.min(minX, maxX);                    /* правый край важнее */
+    var txt = hero.querySelector(".hero-in");
+    var textR = txt ? txt.offsetLeft + txt.offsetWidth * 0.48 : W * 0.42;   /* правый край текстовой колонки */
+    var free0 = textR + 14, free1 = W - padR;                    /* свободная зона справа от текста */
+    var maxX = free1 - box / 2, minX = free0 + box / 2;
+    cx = minX > maxX ? maxX : (free0 + free1) / 2;               /* по центру зоны; если не влезает - правый край важнее */
     x0 = Math.min(0, Math.max(W - rw, cx - g.cx * rw));
     cx = x0 + g.cx * rw;
   }
